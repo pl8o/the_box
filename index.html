@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>HAND MADE WEBSITES — Matrix (Top banner + responsive expanding square)</title>
+<title>HAND MADE WEBSITES — Matrix (THE BOX full-width square, 2-per-row below)</title>
 
 <style>
   :root{
-    --gap: clamp(6px, 1.2vmin, 16px);
+    --gap: clamp(8px, 1.6vmin, 20px);
     --border: clamp(3px, 0.6vmin, 10px);
+    --wrap-padding: 12px;
     --txt-dark: #000;
     --txt-light: #fff;
-    --wrap-padding: 12px;
-    --square-offset: 48px; /* small safety offset so square doesn't touch edges */
+
+    /* runtime-updated by JS to match the primary square / tile sizing */
+    --square-size: 600px;
+    --tile-size: 120px;
   }
 
   /* Page */
@@ -26,7 +29,7 @@
     -moz-osx-font-smoothing:grayscale;
   }
 
-  /* Centering container — allow the square to grow freely (no max-width cap) */
+  /* Centering container */
   .wrap{
     width:100%;
     padding: var(--wrap-padding);
@@ -35,76 +38,79 @@
     justify-content:center;
   }
 
-  /*
-    Expanding square container:
-    - Use 100vmin as the baseline so the square grows with the viewport (vmin = min(vw,vh)).
-    - Subtract small offsets (padding / border / gap) so the square fits comfortably inside the viewport.
-    - Remove the previous max-width limit so on very large screens the square continues to expand.
-    - The grid remains 4×4 so each grid cell is an equal fraction of the square => perfect squares.
-  */
-  .square {
-    /* 100vmin ensures the square keeps growing as you enlarge the window.
-       Subtract a small offset so borders/gaps don't overflow the viewport. */
-    width: calc(100vmin - var(--square-offset));
-    aspect-ratio: 1 / 1;
-    display:grid;
+  /* Content column that grows: no max-width so it expands with the viewport */
+  .content {
+    width: calc(100vw - (var(--wrap-padding) * 2));
     box-sizing: border-box;
-    border: var(--border) solid #000;
-    padding: var(--gap);
-    background: transparent;
-
-    /* fixed 4×4 grid so small cells are perfect squares (fractions of the square) */
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: var(--gap);
-    max-width: none; /* ensure no cap */
+    max-width: none;
   }
 
+  /* THE BOX: full-width square that expands uniformly with screen size */
+  .primary {
+    width: 100%;
+    aspect-ratio: 1 / 1;             /* keeps THE BOX a perfect square full width */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: orange;
+    color:var(--txt-dark);
+    border: calc(var(--border) / 1.2) solid #000;
+    border-radius: 6px;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 8px;
+    margin-bottom: var(--gap);
+    background-clip: padding-box;
+  }
+
+  .primary.colorme_main {
+    animation: bgcolorchange 10s linear infinite;
+  }
+  @keyframes bgcolorchange {
+    0% { background: gold; } 10% { background: orange; } 20% { background:#ff6600; }
+    30% { background: OrangeRed; } 40% { background: magenta; } 50% { background: HotPink; }
+    60% { background: violet; } 70% { background: #ffcc00; } 80% { background: gold; } 100% { background: gold; }
+  }
+
+  .primary .title{
+    margin:0;
+    font-size: clamp(18px, calc(var(--square-size) * 0.06), 140px);
+    line-height:1;
+    text-align:center;
+    word-break:break-word;
+  }
+
+  /* SMALL GRID (two boxes per row on mobile / small screens) */
+  .small-grid {
+    width:100%;
+    display:grid;
+    grid-template-columns: repeat(4, 1fr); /* default on wide screens: 4 columns */
+    gap: var(--gap);
+    box-sizing: border-box;
+
+    /* each grid row will be set to --tile-size by JS so tiles are square */
+    grid-auto-rows: var(--tile-size);
+  }
+
+  /* tile styling (all tiles are squares because grid-auto-rows uses tile size) */
   .card {
     display:flex;
     align-items:center;
     justify-content:center;
     text-decoration:none;
     color:var(--txt-dark);
-    border: calc(var(--border) / 1.2) solid #000;
+    border: calc(var(--border)/1.2) solid #000;
     box-sizing:border-box;
     border-radius:6px;
     overflow:hidden;
+    padding:6px;
     background-clip: padding-box;
-    padding: 6px;
-    user-select: none;
-    transition: transform .15s ease, box-shadow .15s ease;
+    user-select:none;
   }
 
-  .card .inner {
-    width:100%;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:4px;
-  }
+  .card .inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px; }
 
-  /* THE BOX spans the full top row */
-  .primary{
-    grid-column: 1 / 5; /* cover all 4 columns */
-    grid-row: 1 / 2;    /* top row only */
-    background: orange;
-    color:var(--txt-dark);
-    font-weight:700;
-  }
-
-  /* scale font relative to the actual square width using CSS clamp.
-     We also set --square-size (JS) for pixel-accurate scaling (fallback uses vmin). */
-  .primary .title{
-    font-size: clamp(18px, calc(var(--square-size, 100vmin) * 0.06), 140px);
-    line-height:1;
-    margin:0;
-    padding:0;
-  }
-
-  .tile { color:var(--txt-dark); }
+  .promo { margin:0; font-weight:600; font-size: clamp(10px, calc(var(--tile-size) * 0.12), 20px); }
 
   /* colors */
   .c-green{ background: green; }
@@ -120,122 +126,111 @@
   .c-lime{ background: lime; color:var(--txt-dark); }
   .c-gold{ background: gold; color:var(--txt-dark); }
 
-  /* scale promo text proportionally to the square (JS sets --square-size) */
-  .promo{
-    font-size: clamp(10px, calc(var(--square-size, 100vmin) * 0.0135), 22px);
-    font-weight:600;
-    margin:0;
-  }
-
-  /* place the 12 small boxes under the top row: rows 2..4, cols 1..4 */
-  .box1  { grid-column: 1; grid-row: 2; }
-  .box2  { grid-column: 2; grid-row: 2; }
-  .box3  { grid-column: 3; grid-row: 2; }
-  .box4  { grid-column: 4; grid-row: 2; }
-
-  .box5  { grid-column: 1; grid-row: 3; }
-  .box6  { grid-column: 2; grid-row: 3; }
-  .box7  { grid-column: 3; grid-row: 3; }
-  .box8  { grid-column: 4; grid-row: 3; }
-
-  .box9  { grid-column: 1; grid-row: 4; }
-  .box10 { grid-column: 2; grid-row: 4; }
-  .box11 { grid-column: 3; grid-row: 4; }
-  .box12 { grid-column: 4; grid-row: 4; }
-
-  /* primary animation preserved */
-  .primary.colorme_main { animation: bgcolorchange 10s linear infinite; }
-  @keyframes bgcolorchange {
-    0% { background: gold; }
-    10% { background: orange; }
-    20% { background: #ff6600; }
-    30% { background: OrangeRed; }
-    40% { background: magenta; }
-    50% { background: HotPink; }
-    60% { background: violet; }
-    70% { background: #ffcc00; }
-    80% { background: gold; }
-    100% { background: gold; }
-  }
-
-  .card:hover,
-  .card:focus {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 36px rgba(0,0,0,0.5);
-    z-index:2;
-  }
-
+  /* hover/focus */
+  .card:hover, .card:focus { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.45); z-index:2; transition: .15s; }
   .card:focus-visible { outline: 3px solid rgba(255,255,255,0.85); outline-offset:3px; }
 
-  /* For very short viewports, slightly reduce the square so it doesn't overflow */
-  @media (max-height:420px) {
-    .square { width: min(86vmin, calc(100vh - 40px)); }
+  /* ---------- switch to 2 columns for the small-grid on narrow screens ---------- */
+  @media (max-width: 700px) {
+    .small-grid {
+      grid-template-columns: repeat(2, 1fr);
+      /* grid-auto-rows remains var(--tile-size) so each tile is square */
+    }
+    /* scale title a bit for mobile */
+    .primary .title{ font-size: clamp(16px, calc(var(--square-size) * 0.06), 48px); }
   }
 
-  /* small touch tweak */
-  .card { -webkit-tap-highlight-color: rgba(255,255,255,0.06); }
+  /* Ensure the small-grid tiles remain comfortable on short viewports */
+  @media (max-height:420px) {
+    .primary { aspect-ratio: 1 / 1; width: calc(100vw - 48px); } /* slightly reduce if needed */
+  }
 
-  .homelink { text-align:center; margin-top:12px; }
+  /* Homelink */
+  .homelink { text-align:center; margin:18px 0; }
   .homelink a { color:inherit; text-decoration:none; background:rgba(255,255,255,0.06); padding:8px 12px; border-radius:6px; display:inline-block; }
 </style>
 </head>
 <body>
-  <div class="wrap" role="main">
-    <section class="square" aria-label="Square grid with THE BOX on top and smaller boxes underneath">
-      <!-- THE BOX spans the entire top row -->
-      <a class="card primary colorme_main" href="matrix_1.html" target="_blank" rel="noopener" aria-label="THE BOX">
+  <div class="wrap">
+    <div class="content">
+      <!-- THE BOX: full-width square that expands with viewport -->
+      <a class="primary colorme_main" href="matrix_1.html" target="_blank" rel="noopener" aria-label="THE BOX">
         <div class="inner"><h1 class="title">THE<br>BOX</h1></div>
       </a>
 
-      <!-- Row 2 (under the top banner) -->
-      <a class="card tile c-green  box1"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 1 Green"><div class="inner"><h2 class="promo">BOX 1<br>GREEN</h2></div></a>
-      <a class="card tile c-slate  box2"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 2 SlateBlue"><div class="inner"><h2 class="promo">BOX 2<br>SLATEBLUE</h2></div></a>
-      <a class="card tile c-red    box3"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 3 OrangeRed"><div class="inner"><h2 class="promo">BOX 3<br>ORANGERED</h2></div></a>
-      <a class="card tile c-aqua   box4"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 4 Aqua"><div class="inner"><h2 class="promo">BOX 4<br>AQUA</h2></div></a>
+      <!-- small grid: on wide screens 4 across, on mobile 2 across (media query) -->
+      <div class="small-grid" id="smallGrid">
+        <a class="card c-green"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 1<br>GREEN</h2></div></a>
+        <a class="card c-slate"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 2<br>SLATEBLUE</h2></div></a>
 
-      <!-- Row 3 -->
-      <a class="card tile c-orange box5"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 5 Orange"><div class="inner"><h2 class="promo">BOX 5<br>ORANGE</h2></div></a>
-      <a class="card tile c-blv    box6"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 6 BlueViolet"><div class="inner"><h2 class="promo">BOX 6<br>BLUEVIOLET</h2></div></a>
-      <a class="card tile c-magenta box7" href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 7 Magenta"><div class="inner"><h2 class="promo">BOX 7<br>MAGENTA</h2></div></a>
-      <a class="card tile c-ff     box8"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 8 #FFCC00"><div class="inner"><h2 class="promo">BOX 8<br>#FFCC00</h2></div></a>
+        <a class="card c-red"    href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 3<br>ORANGERED</h2></div></a>
+        <a class="card c-aqua"   href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 4<br>AQUA</h2></div></a>
 
-      <!-- Row 4 -->
-      <a class="card tile c-blue  box9"   href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 9 Blue"><div class="inner"><h2 class="promo">BOX 9<br>BLUE</h2></div></a>
-      <a class="card tile c-violet box10" href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 10 Violet"><div class="inner"><h2 class="promo">BOX 10<br>VIOLET</h2></div></a>
-      <a class="card tile c-lime  box11"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 11 Lime"><div class="inner"><h2 class="promo">BOX 11<br>LIME</h2></div></a>
-      <a class="card tile c-gold  box12"  href="matrix_1.html" target="_blank" rel="noopener" aria-label="Box 12 Gold"><div class="inner"><h2 class="promo">BOX 12<br>GOLD</h2></div></a>
-    </section>
+        <a class="card c-orange" href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 5<br>ORANGE</h2></div></a>
+        <a class="card c-blv"    href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 6<br>BLUEVIOLET</h2></div></a>
+
+        <a class="card c-magenta" href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 7<br>MAGENTA</h2></div></a>
+        <a class="card c-ff"     href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 8<br>#FFCC00</h2></div></a>
+
+        <a class="card c-blue"   href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 9<br>BLUE</h2></div></a>
+        <a class="card c-violet" href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 10<br>VIOLET</h2></div></a>
+
+        <a class="card c-lime"   href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 11<br>LIME</h2></div></a>
+        <a class="card c-gold"   href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 12<br>GOLD</h2></div></a>
+      </div>
+    </div>
   </div>
 
-  <div class="homelink">
-    <a href="1_template_gallery.html" target="_blank" rel="noopener">BACK HOME</a>
-  </div>
+  <div class="homelink"><a href="1_template_gallery.html" target="_blank" rel="noopener">BACK HOME</a></div>
 
 <script>
 /*
-  Measure the rendered square and expose its pixel width as --square-size so
-  fonts and other elements scale exactly with the square in CSS.
-  This keeps the entire composition expanding as the screen enlarges.
+  Measure the widths and set --square-size and --tile-size so:
+  - THE BOX remains a full-width square that grows with viewport.
+  - small-grid tiles are perfect squares: tile-size = (gridWidth - gap) / columns
+  Columns = 4 on wide screens, 2 on narrow screens (media query at 700px).
 */
 (function () {
-  const square = document.querySelector('.square');
-  if (!square) return;
+  const primary = document.querySelector('.primary');
+  const grid = document.getElementById('smallGrid');
 
-  function updateSquareSize() {
-    const rect = square.getBoundingClientRect();
-    const size = Math.round(rect.width);
-    square.style.setProperty('--square-size', size + 'px');
+  if (!primary || !grid) return;
+
+  function updateSizes() {
+    // primary square width (content width)
+    const contentWidth = Math.max(document.documentElement.clientWidth - 24, 320);
+    // set square-size to the actual primary width (primary is 100% content width)
+    const squareRect = primary.getBoundingClientRect();
+    const squareSize = Math.round(squareRect.width || contentWidth);
+    document.documentElement.style.setProperty('--square-size', squareSize + 'px');
+
+    // determine columns based on media query
+    const useTwo = window.matchMedia('(max-width:700px)').matches ? 2 : 4;
+    // compute gap in px from CSS
+    const gapPx = parseFloat(getComputedStyle(grid).getPropertyValue('gap')) || 16;
+    // grid content width
+    const gridRect = grid.getBoundingClientRect();
+    const gridWidth = Math.max(gridRect.width, squareSize);
+    // tile size = (gridWidth - totalGaps) / cols
+    const tileSize = Math.floor((gridWidth - gapPx * (useTwo - 1)) / useTwo);
+    grid.style.setProperty('--tile-size', tileSize + 'px');
+
+    // also set root var for promo scaling if desired
+    document.documentElement.style.setProperty('--square-size', squareSize + 'px');
   }
 
-  // Update on load & resize & orientation change
-  window.addEventListener('resize', updateSquareSize, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(updateSquareSize, 120), { passive: true });
-  window.addEventListener('load', () => {
-    updateSquareSize();
-    setTimeout(updateSquareSize, 200);
-  });
+  // throttle with rAF
+  let raf = null;
+  function queuedUpdate() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => { updateSizes(); raf = null; });
+  }
 
-  updateSquareSize();
+  window.addEventListener('resize', queuedUpdate, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(queuedUpdate, 120), { passive: true });
+  window.addEventListener('load', () => { queuedUpdate(); setTimeout(queuedUpdate, 200); });
+
+  queuedUpdate();
 })();
 </script>
 </body>
