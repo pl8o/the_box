@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>HAND MADE WEBSITES — Matrix (THE BOX half-height)</title>
+<title>HAND MADE WEBSITES — Matrix (THE BOX fills first row width)</title>
 
 <style>
   :root{
@@ -13,12 +13,12 @@
     --txt-dark: #000;
     --txt-light: #fff;
 
-    /* runtime-updated by JS to match the primary square / tile sizing */
-    --square-size: 600px;
-    --tile-size: 120px;
+    /* runtime-updated by JS */
+    --grid-width: 100vw;
+    --tile-size: 120px;    /* width/height of each small tile in px */
+    --primary-height-ratio: 0.5; /* primary height = primary width * ratio (height is half of width) */
   }
 
-  /* Page */
   html,body{
     height:100%;
     margin:0;
@@ -29,7 +29,6 @@
     -moz-osx-font-smoothing:grayscale;
   }
 
-  /* Centering container */
   .wrap{
     width:100%;
     padding: var(--wrap-padding);
@@ -39,17 +38,19 @@
   }
 
   .content {
-    width: calc(100vw - (var(--wrap-padding) * 2));
+    width: 100%;
     box-sizing: border-box;
     max-width: none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
 
-  /* THE BOX: full-width on small screens; half-width on large screens.
-     Height is half of its width via aspect-ratio: 2 / 1 (width / height = 2).
-  */
+  /* THE BOX: keeps the full width used by the small-grid below,
+     but its height is half its width (controlled by CSS variable for flexibility). */
   .primary {
-    width: 100%;
-    aspect-ratio: 2 / 1;             /* width:height = 2:1 -> height is half the width */
+    width: calc(var(--grid-width));
+    height: calc(var(--grid-width) * var(--primary-height-ratio));
     display:flex;
     align-items:center;
     justify-content:center;
@@ -64,54 +65,33 @@
     background-clip: padding-box;
   }
 
-  /* On large screens make THE BOX half the container width and center it */
-  @media (min-width: 1100px) {
-    .primary {
-      width: 50%;
-      margin-left: auto;
-      margin-right: auto;
-      margin-bottom: var(--gap);
-    }
-    /* keep the small-grid aligned with THE BOX on large screens */
-    .small-grid {
-      width: 50%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  }
-
-  .primary.colorme_main {
-    animation: bgcolorchange 10s linear infinite;
-  }
+  .primary.colorme_main { animation: bgcolorchange 10s linear infinite; }
   @keyframes bgcolorchange {
     0% { background: gold; } 10% { background: orange; } 20% { background:#ff6600; }
     30% { background: OrangeRed; } 40% { background: magenta; } 50% { background: HotPink; }
     60% { background: violet; } 70% { background: #ffcc00; } 80% { background: gold; } 100% { background: gold; }
   }
 
-  /*
-    Reduced title scale slightly compared to earlier so it fits the new half-height box.
-    Uses --square-size measured by JS (which reports the primary width in pixels).
-  */
   .primary .title{
     margin:0;
-    font-size: clamp(16px, calc(var(--square-size, 100vmin) * 0.045), 140px);
+    font-size: clamp(16px, calc(var(--grid-width) * 0.06), 140px);
     line-height:1;
     text-align:center;
     word-break:break-word;
   }
 
-  /* small grid: default 4 columns on wide, switches to 2 columns at narrow widths */
+  /* small-grid: width is kept equal to --grid-width so THE BOX always fills the first row width */
   .small-grid {
-    width:100%;
+    width: calc(var(--grid-width));
     display:grid;
     grid-template-columns: repeat(4, 1fr);
     gap: var(--gap);
     box-sizing:border-box;
-    grid-auto-rows: var(--tile-size); /* JS will set --tile-size to make tiles square */
+    grid-auto-rows: var(--tile-size); /* JS sets --tile-size to keep tiles square */
+    margin-bottom: var(--gap);
   }
 
-  /* tiles (squares because grid-auto-rows is set equal to column width) */
+  /* tile/card */
   .card {
     display:flex;
     align-items:center;
@@ -126,7 +106,6 @@
     background-clip: padding-box;
     user-select:none;
   }
-
   .card .inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px; }
   .promo { margin:0; font-weight:600; font-size: clamp(10px, calc(var(--tile-size) * 0.12), 22px); }
 
@@ -147,21 +126,18 @@
   .card:hover, .card:focus { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.45); z-index:2; transition:.15s; }
   .card:focus-visible { outline: 3px solid rgba(255,255,255,0.85); outline-offset:3px; }
 
-  /* MOBILE: 2 boxes per row (narrow screens) */
-  @media (max-width: 700px) {
+  /* MOBILE: switch small-grid to 2 columns and ensure grid width fits viewport */
+  @media (max-width:700px) {
     .small-grid {
       grid-template-columns: repeat(2, 1fr);
-      grid-auto-rows: var(--tile-size);
+      /* width still controlled by JS via --grid-width so small-grid matches primary */
     }
-    /* ensure THE BOX is full-width on phones */
-    .primary { width:100%; }
-    .primary .title { font-size: clamp(16px, calc(var(--square-size, 100vw) * 0.06), 48px); }
-    .promo { font-size: clamp(12px, calc(var(--square-size, 100vw) * 0.03), 18px); }
+    .primary { width: calc(var(--grid-width)); height: calc(var(--grid-width) * var(--primary-height-ratio)); }
   }
 
-  /* ensure small heights clamp on very short viewports */
+  /* reduce primary width on very short viewports if necessary */
   @media (max-height:420px) {
-    .primary { width: calc(100vw - 48px); }
+    .primary { height: calc(var(--grid-width) * var(--primary-height-ratio)); }
   }
 
   .homelink { text-align:center; margin:18px 0; }
@@ -171,12 +147,12 @@
 <body>
   <div class="wrap">
     <div class="content">
-      <!-- THE BOX (now half-height relative to its width) -->
+      <!-- THE BOX (width controlled by --grid-width, height is half that width) -->
       <a class="primary colorme_main" href="matrix_1.html" target="_blank" rel="noopener" aria-label="THE BOX">
         <div class="inner"><h1 class="title">THE<br>BOX</h1></div>
       </a>
 
-      <!-- small grid -->
+      <!-- small grid: tiles flow into 4 columns (desktop) or 2 columns (mobile) -->
       <div class="small-grid" id="smallGrid">
         <a class="card c-green"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 1<br>GREEN</h2></div></a>
         <a class="card c-slate"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 2<br>SLATEBLUE</h2></div></a>
@@ -203,40 +179,58 @@
 
 <script>
 /*
-  Measure the primary width and the small-grid width and set CSS variables:
-  - --square-size : pixel width of THE BOX (used to scale its title)
-  - --tile-size : pixel size for each small-grid tile (makes tiles square).
+  JS measures an ideal grid width and tile size and writes them to CSS vars:
+  - --grid-width: the width that both THE BOX and the small-grid will use (in px)
+  - --tile-size: (gridWidth - gaps) / columns -> used as grid-auto-rows so small tiles are squares
+  Behavior:
+  - On wide screens the grid width is based on viewport width (leaving wrap padding).
+  - On mobile the grid width is similar but columns drop to 2; JS detects that with matchMedia.
+  This guarantees THE BOX always fills the first-row width (same width as the small-grid),
+  and the small-grid tiles remain perfect squares and expand as the screen grows.
 */
 (function () {
   const primary = document.querySelector('.primary');
   const grid = document.getElementById('smallGrid');
   if (!primary || !grid) return;
 
-  let rafId = null;
-  function updateSizes() {
-    const primaryRect = primary.getBoundingClientRect();
-    const primaryW = Math.max(Math.round(primaryRect.width), 100);
-    document.documentElement.style.setProperty('--square-size', primaryW + 'px');
+  let raf = null;
+  const wrapPadding = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--wrap-padding')) || 12;
 
+  function update() {
+    // Decide columns (2 on mobile narrow, 4 otherwise)
     const cols = window.matchMedia('(max-width:700px)').matches ? 2 : 4;
-    const computedGridStyle = getComputedStyle(grid);
-    const gapPx = parseFloat(computedGridStyle.getPropertyValue('gap')) || 16;
-    const gridRect = grid.getBoundingClientRect();
-    const gridW = Math.max(Math.round(gridRect.width), primaryW); // prefer grid width but fallback to primary
-    const tileSize = Math.floor((gridW - (cols - 1) * gapPx) / cols);
-    grid.style.setProperty('--tile-size', tileSize + 'px');
+
+    // Compute available width: viewport width minus outer wrap padding
+    const vw = Math.max(document.documentElement.clientWidth || window.innerWidth, 320);
+    const available = vw - (wrapPadding * 2);
+
+    // Use available width as grid width (so THE BOX fills the same width)
+    const gridWidth = Math.floor(available);
+
+    // compute gap px from grid
+    const gapPx = parseFloat(getComputedStyle(grid).getPropertyValue('gap')) || 16;
+
+    // tile size to keep tiles square: (gridWidth - (cols-1)*gap) / cols
+    const tileSize = Math.floor((gridWidth - (cols - 1) * gapPx) / cols);
+
+    // set CSS variables
+    document.documentElement.style.setProperty('--grid-width', gridWidth + 'px');
+    document.documentElement.style.setProperty('--tile-size', tileSize + 'px');
+
+    // also set primary-height-ratio if you want different height ratio for THE BOX (still 0.5)
+    // document.documentElement.style.setProperty('--primary-height-ratio', '0.5');
   }
 
-  function onResize() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => { updateSizes(); rafId = null; });
+  function scheduleUpdate() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => { update(); raf = null; });
   }
 
-  window.addEventListener('resize', onResize, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(onResize, 120), { passive: true });
-  window.addEventListener('load', () => { onResize(); setTimeout(onResize, 200); });
+  window.addEventListener('resize', scheduleUpdate, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(scheduleUpdate, 120), { passive: true });
+  window.addEventListener('load', () => { scheduleUpdate(); setTimeout(scheduleUpdate, 200); });
 
-  onResize();
+  scheduleUpdate();
 })();
 </script>
 </body>
