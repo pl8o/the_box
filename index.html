@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>HAND MADE WEBSITES — Matrix (THE BOX full-width square, 2-per-row below)</title>
+<title>HAND MADE WEBSITES — Matrix (THE BOX half-size on large screens)</title>
 
 <style>
   :root{
@@ -38,17 +38,16 @@
     justify-content:center;
   }
 
-  /* Content column that grows: no max-width so it expands with the viewport */
   .content {
     width: calc(100vw - (var(--wrap-padding) * 2));
     box-sizing: border-box;
     max-width: none;
   }
 
-  /* THE BOX: full-width square that expands uniformly with screen size */
+  /* THE BOX: full-width square on small screens; half-width square on large screens */
   .primary {
     width: 100%;
-    aspect-ratio: 1 / 1;             /* keeps THE BOX a perfect square full width */
+    aspect-ratio: 1 / 1;             /* perfect square */
     display:flex;
     align-items:center;
     justify-content:center;
@@ -63,6 +62,22 @@
     background-clip: padding-box;
   }
 
+  /* On large screens make THE BOX half the container width and center it */
+  @media (min-width: 1100px) {
+    .primary {
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: var(--gap);
+    }
+    /* make small-grid match the primary width on large screens so alignment looks cohesive */
+    .small-grid {
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   .primary.colorme_main {
     animation: bgcolorchange 10s linear infinite;
   }
@@ -74,25 +89,23 @@
 
   .primary .title{
     margin:0;
-    font-size: clamp(18px, calc(var(--square-size) * 0.06), 140px);
+    font-size: clamp(18px, calc(var(--square-size, 100vmin) * 0.06), 140px);
     line-height:1;
     text-align:center;
     word-break:break-word;
   }
 
-  /* SMALL GRID (two boxes per row on mobile / small screens) */
+  /* small grid: by default 4 columns (desktop/tablet), switches to 2 columns at narrow widths */
   .small-grid {
     width:100%;
     display:grid;
-    grid-template-columns: repeat(4, 1fr); /* default on wide screens: 4 columns */
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--gap);
-    box-sizing: border-box;
-
-    /* each grid row will be set to --tile-size by JS so tiles are square */
-    grid-auto-rows: var(--tile-size);
+    box-sizing:border-box;
+    grid-auto-rows: var(--tile-size); /* JS will set --tile-size to make squares */
   }
 
-  /* tile styling (all tiles are squares because grid-auto-rows uses tile size) */
+  /* tiles (squares because grid-auto-rows is set equal to column width) */
   .card {
     display:flex;
     align-items:center;
@@ -109,8 +122,7 @@
   }
 
   .card .inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; text-align:center; padding:4px; }
-
-  .promo { margin:0; font-weight:600; font-size: clamp(10px, calc(var(--tile-size) * 0.12), 20px); }
+  .promo { margin:0; font-weight:600; font-size: clamp(10px, calc(var(--tile-size) * 0.12), 22px); }
 
   /* colors */
   .c-green{ background: green; }
@@ -126,26 +138,26 @@
   .c-lime{ background: lime; color:var(--txt-dark); }
   .c-gold{ background: gold; color:var(--txt-dark); }
 
-  /* hover/focus */
-  .card:hover, .card:focus { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.45); z-index:2; transition: .15s; }
+  .card:hover, .card:focus { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.45); z-index:2; transition:.15s; }
   .card:focus-visible { outline: 3px solid rgba(255,255,255,0.85); outline-offset:3px; }
 
-  /* ---------- switch to 2 columns for the small-grid on narrow screens ---------- */
+  /* MOBILE: show 2 boxes per row (small-grid) to reduce empty space */
   @media (max-width: 700px) {
     .small-grid {
       grid-template-columns: repeat(2, 1fr);
-      /* grid-auto-rows remains var(--tile-size) so each tile is square */
+      grid-auto-rows: var(--tile-size);
     }
-    /* scale title a bit for mobile */
-    .primary .title{ font-size: clamp(16px, calc(var(--square-size) * 0.06), 48px); }
+    /* ensure THE BOX remains full-width on phones */
+    .primary { width:100%; }
+    .primary .title { font-size: clamp(16px, calc(var(--square-size, 100vw) * 0.06), 48px); }
+    .promo { font-size: clamp(12px, calc(var(--square-size, 100vw) * 0.03), 18px); }
   }
 
-  /* Ensure the small-grid tiles remain comfortable on short viewports */
+  /* ensure small heights clamp on very short viewports */
   @media (max-height:420px) {
-    .primary { aspect-ratio: 1 / 1; width: calc(100vw - 48px); } /* slightly reduce if needed */
+    .primary { width: calc(100vw - 48px); }
   }
 
-  /* Homelink */
   .homelink { text-align:center; margin:18px 0; }
   .homelink a { color:inherit; text-decoration:none; background:rgba(255,255,255,0.06); padding:8px 12px; border-radius:6px; display:inline-block; }
 </style>
@@ -153,12 +165,12 @@
 <body>
   <div class="wrap">
     <div class="content">
-      <!-- THE BOX: full-width square that expands with viewport -->
+      <!-- THE BOX -->
       <a class="primary colorme_main" href="matrix_1.html" target="_blank" rel="noopener" aria-label="THE BOX">
         <div class="inner"><h1 class="title">THE<br>BOX</h1></div>
       </a>
 
-      <!-- small grid: on wide screens 4 across, on mobile 2 across (media query) -->
+      <!-- small grid -->
       <div class="small-grid" id="smallGrid">
         <a class="card c-green"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 1<br>GREEN</h2></div></a>
         <a class="card c-slate"  href="matrix_1.html" rel="noopener"><div class="inner"><h2 class="promo">BOX 2<br>SLATEBLUE</h2></div></a>
@@ -185,52 +197,54 @@
 
 <script>
 /*
-  Measure the widths and set --square-size and --tile-size so:
-  - THE BOX remains a full-width square that grows with viewport.
-  - small-grid tiles are perfect squares: tile-size = (gridWidth - gap) / columns
-  Columns = 4 on wide screens, 2 on narrow screens (media query at 700px).
+  Measure the primary square width and the small-grid width and set CSS variables:
+  - --square-size : pixel width of THE BOX (used to scale its title)
+  - --tile-size : pixel size for each small-grid tile (makes tiles square).
+  This keeps THE BOX and the tiles expanding proportionally; on large screens THE BOX
+  is half-width (CSS media query) and tiles are calculated from the smallGrid width.
 */
 (function () {
   const primary = document.querySelector('.primary');
   const grid = document.getElementById('smallGrid');
-
   if (!primary || !grid) return;
 
+  let rafId = null;
   function updateSizes() {
-    // primary square width (content width)
-    const contentWidth = Math.max(document.documentElement.clientWidth - 24, 320);
-    // set square-size to the actual primary width (primary is 100% content width)
-    const squareRect = primary.getBoundingClientRect();
-    const squareSize = Math.round(squareRect.width || contentWidth);
-    document.documentElement.style.setProperty('--square-size', squareSize + 'px');
+    // primary width (actual rendered)
+    const primaryRect = primary.getBoundingClientRect();
+    const primaryW = Math.max(Math.round(primaryRect.width), 100);
 
-    // determine columns based on media query
-    const useTwo = window.matchMedia('(max-width:700px)').matches ? 2 : 4;
-    // compute gap in px from CSS
-    const gapPx = parseFloat(getComputedStyle(grid).getPropertyValue('gap')) || 16;
-    // grid content width
+    // expose primary width for CSS scaling
+    document.documentElement.style.setProperty('--square-size', primaryW + 'px');
+
+    // decide columns (2 on mobile, 4 on wide)
+    const cols = window.matchMedia('(max-width:700px)').matches ? 2 : 4;
+
+    // compute gap px
+    const computedGridStyle = getComputedStyle(grid);
+    const gapPx = parseFloat(computedGridStyle.getPropertyValue('gap')) || 16;
+
+    // grid width: if small-grid has its own width (on large screens it's 50%), read it;
+    // otherwise use full content width.
     const gridRect = grid.getBoundingClientRect();
-    const gridWidth = Math.max(gridRect.width, squareSize);
-    // tile size = (gridWidth - totalGaps) / cols
-    const tileSize = Math.floor((gridWidth - gapPx * (useTwo - 1)) / useTwo);
+    const gridW = Math.max(Math.round(gridRect.width), 120);
+
+    // tile size: (gridW - (cols-1)*gap) / cols
+    const tileSize = Math.floor((gridW - (cols - 1) * gapPx) / cols);
+
     grid.style.setProperty('--tile-size', tileSize + 'px');
-
-    // also set root var for promo scaling if desired
-    document.documentElement.style.setProperty('--square-size', squareSize + 'px');
   }
 
-  // throttle with rAF
-  let raf = null;
-  function queuedUpdate() {
-    if (raf) cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => { updateSizes(); raf = null; });
+  function onResize() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => { updateSizes(); rafId = null; });
   }
 
-  window.addEventListener('resize', queuedUpdate, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(queuedUpdate, 120), { passive: true });
-  window.addEventListener('load', () => { queuedUpdate(); setTimeout(queuedUpdate, 200); });
+  window.addEventListener('resize', onResize, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(onResize, 120), { passive: true });
+  window.addEventListener('load', () => { onResize(); setTimeout(onResize, 200); });
 
-  queuedUpdate();
+  onResize();
 })();
 </script>
 </body>
